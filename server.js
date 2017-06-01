@@ -1,10 +1,17 @@
 //  OpenShift sample Node application
 var express = require('express'),
-    app     = express();
+    fs      = require('fs'),
+    app     = express(),
+    eps     = require('ejs'),
+    morgan  = require('morgan');
     
+Object.assign=require('object-assign')
+
+app.engine('html', require('ejs').renderFile);
+app.use(morgan('combined'))
 
 var port = process.env.PORT || process.env.OPENSHIFT_NODEJS_PORT || 8080,
-    ip   = process.env.IP   || process.env.OPENSHIFT_NODEJS_IP || '127.0.0.1',
+    ip   = process.env.IP   || process.env.OPENSHIFT_NODEJS_IP || '0.0.0.0',
     mongoURL = process.env.OPENSHIFT_MONGODB_DB_URL || process.env.MONGO_URL,
     mongoURLLabel = "";
 
@@ -62,10 +69,10 @@ app.get('/', function (req, res) {
     // Create a document with request IP and current time of request
     col.insert({ip: req.ip, date: Date.now()});
     col.count(function(err, count){
-      res.send('{ pageCount: will come}');
+      res.render('index.html', { pageCountMessage : count, dbInfo: dbDetails });
     });
   } else {
-    res.send('{ pageCount: soon ;)}');
+    res.render('index.html', { pageCountMessage : null});
   }
 });
 
